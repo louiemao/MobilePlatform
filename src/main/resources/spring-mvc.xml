@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+    <context:property-placeholder location="classpath:config.properties"/>
+
+    <!-- bean配置在spring-jpa.xml里,所以这里暂为空，用来初始化spring容器-->
+    <context:annotation-config/>
+    <context:component-scan base-package="com.sws.platform.mobile">
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+        <context:include-filter type="annotation"
+                                expression="org.springframework.web.bind.annotation.ControllerAdvice"/>
+    </context:component-scan>
+    <!-- 默认情况下spring mvc暴露的 RESTFul服务会在客户端提示406的错误，需要增加下面的配置，且在pom中导入依赖的库文件-->
+    <!-- 以下为SpringMVC配置 -->
+    <mvc:annotation-driven>
+        <!-- 返回json数据，@ResponseBody使用 -->
+        <mvc:message-converters register-defaults="true">
+            <!--<bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">-->
+            <!--&lt;!&ndash;格式转换，默认会把时间转为毫秒值，这里设置改为转为时间字符串&ndash;&gt;-->
+            <!--&lt;!&ndash;<property name="objectMapper">&ndash;&gt;-->
+            <!--&lt;!&ndash;<bean class="com.fasterxml.jackson.databind.ObjectMapper">&ndash;&gt;-->
+            <!--&lt;!&ndash;<property name="dateFormat">&ndash;&gt;-->
+            <!--&lt;!&ndash;<bean class="java.text.SimpleDateFormat">&ndash;&gt;-->
+            <!--&lt;!&ndash;<constructor-arg type="java.lang.String" value="yyyy-MM-dd HH:mm:ss"/>&ndash;&gt;-->
+            <!--&lt;!&ndash;</bean>&ndash;&gt;-->
+            <!--&lt;!&ndash;</property>&ndash;&gt;-->
+            <!--&lt;!&ndash;</bean>&ndash;&gt;-->
+            <!--&lt;!&ndash;</property>&ndash;&gt;-->
+            <!--<property name="objectMapper" ref="objectMapper"/>-->
+            <!--<property name="supportedMediaTypes">-->
+            <!--<list>-->
+            <!--<value>text/html;charset=UTF-8</value>-->
+            <!--<value>application/json;charset=UTF-8</value>-->
+            <!--</list>-->
+            <!--</property>-->
+            <!--</bean>-->
+
+            <!-- StringHttpMessageConverter编码为UTF-8，防止乱码 -->
+            <bean class="org.springframework.http.converter.StringHttpMessageConverter">
+                <constructor-arg value="UTF-8"/>
+                <property name="supportedMediaTypes">
+                    <list>
+                        <bean class="org.springframework.http.MediaType">
+                            <constructor-arg index="0" value="text"/>
+                            <constructor-arg index="1" value="plain"/>
+                            <constructor-arg index="2" value="UTF-8"/>
+                        </bean>
+                        <bean class="org.springframework.http.MediaType">
+                            <constructor-arg index="0" value="*"/>
+                            <constructor-arg index="1" value="*"/>
+                            <constructor-arg index="2" value="UTF-8"/>
+                        </bean>
+                    </list>
+                </property>
+            </bean>
+
+
+            <bean class="com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter">
+                <property name="supportedMediaTypes">
+                    <list>
+                        <value>text/html;charset=UTF-8</value>
+                        <value>application/json;charset=UTF-8</value>
+                        <!--<value>application/xml;charset=UTF-8</value>-->
+                    </list>
+                </property>
+                <property name="fastJsonConfig">
+                    <bean id="fastJsonConfig" class="com.alibaba.fastjson.support.config.FastJsonConfig">
+                        <property name="features">
+                            <list>
+                                <value>AllowArbitraryCommas</value>
+                                <value>AllowUnQuotedFieldNames</value>
+                                <value>DisableCircularReferenceDetect</value>
+                            </list>
+                        </property>
+                        <property name="serializerFeatures">
+                            <list>
+                                <value>QuoteFieldNames</value>
+                                <value>WriteMapNullValue</value>
+                                <value>DisableCircularReferenceDetect</value>
+                            </list>
+                        </property>
+                        <property name="dateFormat" value="yyyy-MM-dd'T'HH:mm:ss"></property>
+                    </bean>
+                </property>
+            </bean>
+        </mvc:message-converters>
+
+        <mvc:argument-resolvers>
+            <bean class="com.sws.platform.mobile.common.miniui.MiniUIPageableResolver"/>
+            <bean class="com.sws.platform.mobile.common.miniui.MiniUIEntityResolver"/>
+            <bean class="com.sws.platform.mobile.common.json.RequestJsonParamMethodArgumentResolver"/>
+        </mvc:argument-resolvers>
+    </mvc:annotation-driven>
+
+    <mvc:resources mapping="/static/**" location="/static/"/>
+
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/view/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+
+    <!--<bean id="objectMapper" class="com.fasterxml.jackson.databind.ObjectMapper">-->
+    <!--<property name="dateFormat">-->
+    <!--<bean class="java.text.SimpleDateFormat">-->
+    <!--<constructor-arg type="java.lang.String" value="yyyy-MM-dd'T'HH:mm:ss"/>-->
+    <!--</bean>-->
+    <!--</property>-->
+    <!--</bean>-->
+
+    <bean id="exceptionHandler" class="com.sws.platform.mobile.common.exception.ExceptionHandler"/>
+
+    <import resource="spring-mvc-upload.xml"/>
+    <import resource="classpath:spring-mvc-shiro.xml"/>
+</beans>

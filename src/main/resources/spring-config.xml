@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop.xsd
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <!-- spring启动时扫描项目路径下的properties文件,后续用${key }方式取出对应值,这样可以代码解耦和，后续只需修改properties文件即可 -->
+    <context:property-placeholder location="classpath:config.properties,classpath:db.properties"/>
+
+    <!--扫描注解Bean-->
+    <context:component-scan base-package="com.sws.platform.mobile"/>
+
+    <!--&lt;!&ndash;自定义的参数注入&ndash;&gt;-->
+    <!--<bean class="com.sws.platform.mobile.security.service.impl.RestConfig">-->
+        <!--<property name="URL_BASE" value="${cp.baseUrl}"/>-->
+        <!--<property name="SYS_CD" value="${cp.sysCd}"/>-->
+    <!--</bean>-->
+
+    <!--开启使用@Transaction注解-->
+    <tx:annotation-driven/>
+
+    <!-- 启动对@AspectJ（面向切面）注解的支持 -->
+    <aop:aspectj-autoproxy/>
+
+    <import resource="classpath:spring-config-cache.xml"/>
+    <import resource="classpath:spring-config-db.xml"/>
+    <import resource="classpath:spring-config-jdbc.xml"/>
+    <import resource="classpath:spring-config-jpa.xml"/>
+    <import resource="classpath:spring-config-shiro.xml"/>
+</beans>
